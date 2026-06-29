@@ -69,17 +69,6 @@ Coinly/
 
 ---
 
-## Screenshots
-
-Add your project screenshots here.
-
-* Login Page
-* Dashboard
-* Transactions
-* Analytics
-* Categories
-
----
 
 ## Future Improvements
 
