@@ -32,11 +32,14 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Serve static assets in production (for single-instance hosting)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve static assets (for single-instance hosting) if client/dist exists on disk
+const fs = require('fs');
+const distPath = path.join(__dirname, '../client/dist');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
   app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+    res.sendFile(path.resolve(distPath, 'index.html'));
   });
 }
 
