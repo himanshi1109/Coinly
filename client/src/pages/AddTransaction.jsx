@@ -13,6 +13,7 @@ const AddTransaction = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [categories, setCategories] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchingConfig, setFetchingConfig] = useState(true);
   const [customCategory, setCustomCategory] = useState('');
@@ -22,15 +23,33 @@ const AddTransaction = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await API.get('/categories');
-        setCategories(res.data.data);
+        const [catRes, budgetRes] = await Promise.all([
+          API.get('/categories'),
+          API.get('/budgets')
+        ]);
+        setCategories(catRes.data.data);
+        setBudgets(budgetRes.data.data);
       } catch (e) {
-        toast.error('Failed to load categories');
+        toast.error('Failed to load transaction settings');
       } finally {
         setFetchingConfig(false);
       }
     })();
   }, []);
+
+  const handleCategorySelect = (catName) => {
+    if (type === 'expense' && catName !== 'Other') {
+      const hasBudget = budgets.some(b => b.category.toLowerCase() === catName.toLowerCase());
+      if (!hasBudget) {
+        toast.error(`Please set up a budget for "${catName}" first! Redirecting...`);
+        setTimeout(() => {
+          navigate('/budgets', { state: { openAdd: true, category: catName } });
+        }, 1200);
+        return;
+      }
+    }
+    setCategory(catName);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +132,7 @@ const AddTransaction = () => {
                 return (
                   <div 
                     key={c._id}
-                    onClick={() => setCategory(c.name)}
+                    onClick={() => handleCategorySelect(c.name)}
                     style={{
                       padding: '8px 16px',
                       borderRadius: 'var(--r-pill)',
@@ -123,9 +142,9 @@ const AddTransaction = () => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      backgroundColor: isSelected ? 'var(--pink)' : 'var(--surface)',
-                      color: isSelected ? '#fff' : 'var(--text)',
-                      border: `1.5px solid ${isSelected ? 'var(--pink)' : 'var(--border)'}`,
+                      backgroundColor: isSelected ? config.text : 'var(--surface)',
+                      color: isSelected ? 'var(--bg)' : 'var(--text)',
+                      border: `1.5px solid ${isSelected ? config.text : 'var(--border)'}`,
                       transition: 'all 0.2s'
                     }}
                   >

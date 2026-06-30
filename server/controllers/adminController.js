@@ -33,23 +33,25 @@ const getUserById = async (req, res, next) => {
 // Get all transactions across all users
 const getAllTransactions = async (req, res, next) => {
   try {
-    let query = Transaction.find();
+    const filter = {};
 
     // Filters
     if (req.query.search) {
-      query = query.find({ notes: { $regex: req.query.search, $options: 'i' } });
+      filter.notes = { $regex: req.query.search, $options: 'i' };
     }
     if (req.query.category) {
-      query = query.find({ category: req.query.category });
+      filter.category = req.query.category;
     }
     if (req.query.type) {
-      query = query.find({ type: req.query.type });
+      filter.type = req.query.type;
+    }
+    if (req.query.userId) {
+      filter.userId = req.query.userId;
     }
     if (req.query.startDate || req.query.endDate) {
-      const dateFilter = {};
-      if (req.query.startDate) dateFilter.$gte = new Date(req.query.startDate);
-      if (req.query.endDate) dateFilter.$lte = new Date(req.query.endDate);
-      query = query.find({ date: dateFilter });
+      filter.date = {};
+      if (req.query.startDate) filter.date.$gte = new Date(req.query.startDate);
+      if (req.query.endDate) filter.date.$lte = new Date(req.query.endDate);
     }
 
     // Pagination
@@ -57,8 +59,12 @@ const getAllTransactions = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
 
-    const total = await Transaction.countDocuments(query);
-    const transactions = await query.skip(startIndex).limit(limit).sort('-date').populate('userId', 'name email');
+    const total = await Transaction.countDocuments(filter);
+    const transactions = await Transaction.find(filter)
+      .skip(startIndex)
+      .limit(limit)
+      .sort('-date')
+      .populate('userId', 'name email');
 
     res.json({
       success: true,

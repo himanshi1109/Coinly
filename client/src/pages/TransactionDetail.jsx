@@ -4,6 +4,7 @@ import API from '../api/axios';
 import PageHeader from '../components/PageHeader';
 import Loader from '../components/Loader';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { formatCurrency } from '../utils/formatCurrency';
 import { CATEGORY_COLORS } from '../utils/categoryConfig';
 
@@ -12,6 +13,7 @@ const TransactionDetail = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -27,8 +29,7 @@ const TransactionDetail = () => {
     })();
   }, [id, navigate]);
 
-  const handleDelete = async () => {
-    if (!window.confirm('Delete this transaction?')) return;
+  const executeDelete = async () => {
     try {
       await API.delete(`/transactions/${id}`);
       toast.success('Transaction deleted');
@@ -80,10 +81,18 @@ const TransactionDetail = () => {
           </div>
         </div>
 
-        <button onClick={handleDelete} className="btn" style={{ background: 'var(--pink-bg)', color: 'var(--pink)', width: '100%', padding: '16px' }}>
+        <button onClick={() => setConfirmOpen(true)} className="btn" style={{ background: 'var(--pink-bg)', color: 'var(--pink)', width: '100%', padding: '16px' }}>
           Delete Transaction
         </button>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmOpen} 
+        onClose={() => setConfirmOpen(false)} 
+        onConfirm={executeDelete} 
+        title="Delete Transaction" 
+        message="Are you sure you want to permanently delete this transaction record? This action cannot be undone." 
+      />
     </div>
   );
 };

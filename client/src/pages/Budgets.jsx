@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import API from '../api/axios';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
 import BudgetCard from '../components/BudgetCard';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
+import ConfirmModal from '../components/ConfirmModal';
 
 const Budgets = () => {
   const [budgets, setBudgets] = useState([]);
@@ -15,6 +17,10 @@ const Budgets = () => {
   const [editId, setEditId] = useState(null);
   const [category, setCategory] = useState('');
   const [limit, setLimit] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
+  const location = useLocation();
 
   const fetchBudgets = async () => {
     try {
@@ -36,6 +42,15 @@ const Budgets = () => {
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openAdd && !loading) {
+      setEditId(null);
+      setCategory(location.state.category || '');
+      setLimit('');
+      setIsModalOpen(true);
+    }
+  }, [location, loading]);
 
   const openModal = (b = null) => {
     if (b) {
@@ -67,10 +82,15 @@ const Budgets = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this budget?')) return;
+  const triggerDelete = (id) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteId) return;
     try {
-      await API.delete(`/budgets/${id}`);
+      await API.delete(`/budgets/${deleteId}`);
       toast.success('Budget deleted');
       fetchBudgets();
     } catch (err) {
@@ -103,7 +123,7 @@ const Budgets = () => {
               budget={b} 
               spent={b.spent} 
               onEdit={openModal} 
-              onDelete={handleDelete} 
+              onDelete={triggerDelete} 
             />
           ))}
         </div>
@@ -121,7 +141,10 @@ const Budgets = () => {
               required
             >
               <option value="">Select a category</option>
-              {categories.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+              {categories
+                .filter(c => !['salary', 'freelance', 'investments', 'rental', 'bonus', 'gifts'].includes(c.name.toLowerCase()))
+                .map(c => <option key={c._id} value={c.name}>{c.name}</option>)
+              }
             </select>
           </div>
           <div>
@@ -139,6 +162,14 @@ const Budgets = () => {
           </button>
         </form>
       </Modal>
+
+      <ConfirmModal 
+        isOpen={confirmOpen} 
+        onClose={() => setConfirmOpen(false)} 
+        onConfirm={executeDelete} 
+        title="Delete Budget" 
+        message="Are you sure you want to permanently delete this budget? This will remove the spending limit category warnings." 
+      />
     </div>
   );
 };

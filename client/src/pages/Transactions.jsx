@@ -3,6 +3,7 @@ import API from '../api/axios';
 import PageHeader from '../components/PageHeader';
 import TransactionItem from '../components/TransactionItem';
 import Loader from '../components/Loader';
+import { formatCurrency } from '../utils/formatCurrency';
 
 const Transactions = () => {
   const [data, setData] = useState([]);
@@ -29,11 +30,37 @@ const Transactions = () => {
 
   const filtered = data.filter(tx => filter === 'All' || tx.type === filter.toLowerCase());
 
+  const totalIncome = data
+    .filter(tx => tx.type === 'income')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
+  const totalExpense = data
+    .filter(tx => tx.type === 'expense')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
   return (
     <div>
       <PageHeader title="Transactions" subtitle="All your history in one place." />
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+        <div className="dash-card" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(73, 139, 129, 0.05)', border: '1.5px solid rgba(73, 139, 129, 0.1)', borderRadius: '24px' }}>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Income</span>
+            <p style={{ fontSize: '24px', fontWeight: '900', color: 'var(--teal)', margin: '4px 0 0 0' }}>{formatCurrency(totalIncome)}</p>
+          </div>
+          <div style={{ fontSize: '28px' }}>📈</div>
+        </div>
+
+        <div className="dash-card" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 71, 111, 0.05)', border: '1.5px solid rgba(239, 71, 111, 0.1)', borderRadius: '24px' }}>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Expense</span>
+            <p style={{ fontSize: '24px', fontWeight: '900', color: 'var(--red)', margin: '4px 0 0 0' }}>{formatCurrency(totalExpense)}</p>
+          </div>
+          <div style={{ fontSize: '28px' }}>💸</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '6px 4px 12px 4px', margin: '-6px -4px 16px -4px' }}>
         {['All', 'Income', 'Expense'].map(f => (
           <div 
             key={f}

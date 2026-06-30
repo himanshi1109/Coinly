@@ -9,8 +9,7 @@ import Chatbot from './components/Chatbot';
 
 // Pages
 import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import AddTransaction from './pages/AddTransaction';
@@ -23,6 +22,8 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminTransactions from './pages/admin/AdminTransactions';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminReports from './pages/admin/AdminReports';
 
 // The App Shell wraps the protected routes
 const AppShell = () => (
@@ -46,8 +47,8 @@ function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Auth mode="login" />} />
+          <Route path="/register" element={<Auth mode="register" />} />
 
           {/* Protected with App Shell */}
           <Route element={<ProtectedRoute />}>
@@ -65,6 +66,8 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/transactions" element={<AdminTransactions />} />
+                <Route path="/admin/categories" element={<AdminCategories />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
               </Route>
             </Route>
           </Route>

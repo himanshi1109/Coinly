@@ -7,15 +7,17 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: ["admin", "user"], default: "user" }
+    role: { type: String, enum: ["admin", "user"], default: "user" },
+    phone: { type: String, default: "" },
+    status: { type: String, enum: ["active", "inactive"], default: "active" }
   },
   { timestamps: true }
 );
 
 // Pre-save hook: hash password with bcrypt (saltRounds = 10)
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

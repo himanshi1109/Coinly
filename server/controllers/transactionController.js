@@ -1,5 +1,34 @@
 const Transaction = require('../models/Transaction');
+const Budget = require('../models/Budget');
+const Notification = require('../models/Notification');
 const { validationResult } = require('express-validator');
+
+// Helper to check budget limit and trigger warning notification
+const checkBudgetLimit = async (userId, category) => {
+  try {
+    const budget = await Budget.findOne({ userId, category });
+    if (!budget) return;
+
+    const transactions = await Transaction.find({
+      userId,
+      category,
+      type: 'expense'
+    });
+    
+    const totalSpent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+
+    if (totalSpent > budget.limit) {
+      await Notification.create({
+        userId,
+        title: 'Budget Limit Exceeded ⚠️',
+        message: `Your total expenses in "${category}" have reached ₹${totalSpent.toLocaleString()} which exceeds your set budget limit of ₹${budget.limit.toLocaleString()}!`,
+        type: 'danger'
+      });
+    }
+  } catch (err) {
+    console.error('Error checking budget limits:', err);
+  }
+};
 
 // Create a new transaction
 const createTransaction = async (req, res, next) => {
@@ -11,6 +40,15 @@ const createTransaction = async (req, res, next) => {
 
     const { type, amount, category, notes, date } = req.body;
 
+    if (type === 'expense' && category.toLowerCase() !== 'other') {
+      const budget = await Budget.findOne({ userId: req.user._id, category });
+      if (!budget) {
+        const err = new Error(`Please set up a budget for "${category}" before adding expenses in it!`);
+        err.statusCode = 400;
+        return next(err);
+      }
+    }
+
     const transaction = await Transaction.create({
       userId: req.user._id,
       type,
@@ -19,6 +57,10 @@ const createTransaction = async (req, res, next) => {
       notes,
       date: date || Date.now()
     });
+
+    if (type === 'expense') {
+      await checkBudgetLimit(req.user._id, category);
+    }
 
     res.status(201).json({ success: true, data: transaction });
   } catch (error) {
@@ -114,10 +156,26 @@ const updateTransaction = async (req, res, next) => {
       return next(err);
     }
 
+    const targetType = req.body.type || transaction.type;
+    const targetCategory = req.body.category || transaction.category;
+
+    if (targetType === 'expense' && targetCategory.toLowerCase() !== 'other') {
+      const budget = await Budget.findOne({ userId: req.user._id, category: targetCategory });
+      if (!budget) {
+        const err = new Error(`Please set up a budget for "${targetCategory}" before adding expenses in it!`);
+        err.statusCode = 400;
+        return next(err);
+      }
+    }
+
     transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });
+
+    if (transaction.type === 'expense') {
+      await checkBudgetLimit(req.user._id, transaction.category);
+    }
 
     res.json({ success: true, data: transaction });
   } catch (error) {

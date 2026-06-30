@@ -6,5 +6,12 @@ export const CATEGORY_COLORS = {
   Entertainment: { bg: '#FEF9E1', text: '#F5C518', icon: '🎮' },
   Health:        { bg: '#E6F1FE', text: '#3A8FE8', icon: '❤️' },
   Education:     { bg: '#EEE8FA', text: '#7C5CBF', icon: '📚' },
+  Salary:        { bg: '#E2F7E3', text: '#2E7D32', icon: '💼' },
+  Freelance:     { bg: '#E0F7FA', text: '#00838F', icon: '💻' },
+  Investments:   { bg: '#FBE9E7', text: '#D84315', icon: '📈' },
+  Rental:        { bg: '#FFFDE7', text: '#FBC02D', icon: '🏠' },
+  Bonus:         { bg: '#FFF0F5', text: '#C2185B', icon: '💰' },
+  Gifts:         { bg: '#FFF3E0', text: '#EF6C00', icon: '🎁' },
+  Taxes:         { bg: '#FFEBEE', text: '#C62828', icon: '💸' },
   Other:         { bg: '#F2F4F8', text: '#8A8FAD', icon: '📦' },
 };

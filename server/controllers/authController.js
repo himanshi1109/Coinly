@@ -90,7 +90,9 @@ const getMe = async (req, res, next) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          phone: user.phone || "",
+          status: user.status || "active"
         }
       });
     } else {
@@ -103,8 +105,55 @@ const getMe = async (req, res, next) => {
   }
 };
 
+// Update user profile details
+const updateProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      const err = new Error('User not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    const { name, email, phone, status } = req.body;
+
+    if (name) user.name = name;
+    if (email) {
+      if (email.toLowerCase() !== user.email.toLowerCase()) {
+        const emailTaken = await User.findOne({ email: email.toLowerCase() });
+        if (emailTaken) {
+          const err = new Error('Email is already in use by another account');
+          err.statusCode = 400;
+          return next(err);
+        }
+        user.email = email.toLowerCase();
+      }
+    }
+    if (phone !== undefined) user.phone = phone;
+    if (status !== undefined) user.status = status;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone || "",
+        status: user.status || "active"
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
-  getMe
+  getMe,
+  updateProfile
 };

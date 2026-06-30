@@ -11,6 +11,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const chatRoutes = require('./routes/chat');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Catch-all error middleware (MUST be last)
 app.use(errorHandler);

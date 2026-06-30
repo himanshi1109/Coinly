@@ -51,19 +51,19 @@ const Dashboard = () => {
 
   const { dashboard, budgets } = data;
   
-  // Fake chart data for Area Chart (Learning Progress style)
-  const areaData = dashboard.totalIncome > 0 ? [
-    { name: 'May', balance: dashboard.totalIncome * 0.4 },
-    { name: 'Jun', balance: dashboard.totalIncome * 0.7 },
-    { name: 'Jul', balance: dashboard.totalIncome * 0.5 },
-    { name: 'Aug', balance: dashboard.totalIncome * 0.9 },
-    { name: 'Sep', balance: dashboard.totalIncome * 1.0 },
+  // Dynamic chart data for Area Chart representing Balance History growth
+  const areaData = dashboard.balance > 0 ? [
+    { name: 'May', balance: Math.round(dashboard.balance * 0.4) },
+    { name: 'Jun', balance: Math.round(dashboard.balance * 0.6) },
+    { name: 'Jul', balance: Math.round(dashboard.balance * 0.5) },
+    { name: 'Aug', balance: Math.round(dashboard.balance * 0.85) },
+    { name: 'Sep', balance: Math.round(dashboard.balance) },
   ] : [
-    { name: 'May', balance: 400 },
-    { name: 'Jun', balance: 700 },
-    { name: 'Jul', balance: 500 },
-    { name: 'Aug', balance: 900 },
-    { name: 'Sep', balance: 1000 },
+    { name: 'May', balance: 0 },
+    { name: 'Jun', balance: 0 },
+    { name: 'Jul', balance: 0 },
+    { name: 'Aug', balance: 0 },
+    { name: 'Sep', balance: 0 },
   ];
 
   // Fake chart data for Stacked Bar Chart (My Courses/Schedule style)
@@ -118,12 +118,20 @@ const Dashboard = () => {
                 
                 <div style={{ display: 'flex', gap: '32px' }}>
                   <div>
-                    <p style={{ fontSize: '32px', fontWeight: '800', color: 'var(--cream)', lineHeight: 1, marginBottom: '4px' }}>{formatCurrency(dashboard.totalIncome)}</p>
+                    <p style={{ fontSize: '32px', fontWeight: '800', color: 'var(--cream)', lineHeight: 1, marginBottom: '4px' }}>{formatCurrency(dashboard.balance)}</p>
                     <p style={{ fontSize: '13px', fontWeight: '700', color: 'var(--muted)' }}>Total Balance</p>
                   </div>
                   <div>
-                    <p style={{ fontSize: '24px', fontWeight: '800', color: 'var(--teal)', lineHeight: 1, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '14px', background: 'rgba(73, 139, 129, 0.1)', padding: '2px 8px', borderRadius: '8px' }}>+{savingsRate}%</span>
+                    <p style={{ fontSize: '24px', fontWeight: '800', color: savingsRate >= 0 ? 'var(--teal)' : 'var(--red)', lineHeight: 1, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        background: savingsRate >= 0 ? 'rgba(73, 139, 129, 0.1)' : 'rgba(239, 71, 111, 0.1)', 
+                        color: savingsRate >= 0 ? 'var(--teal)' : 'var(--red)',
+                        padding: '2px 8px', 
+                        borderRadius: '8px' 
+                      }}>
+                        {savingsRate >= 0 ? '+' : ''}{savingsRate}%
+                      </span>
                     </p>
                     <p style={{ fontSize: '13px', fontWeight: '700', color: 'var(--muted)' }}>Growth</p>
                   </div>
@@ -131,7 +139,7 @@ const Dashboard = () => {
               </div>
               <div style={{ flex: 1, minHeight: '160px', marginTop: '-10px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={areaData} margin={{ top: 40, right: 20, left: 20, bottom: 0 }}>
+                  <AreaChart data={areaData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
                     <defs>
                       <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="var(--pink)" stopOpacity={0.4}/>
@@ -140,37 +148,56 @@ const Dashboard = () => {
                     </defs>
                     <Tooltip cursor={{ stroke: 'rgba(255,255,255,0.05)', strokeWidth: 2 }} contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', background: 'var(--surface)', color: 'var(--cream)', fontWeight: '700', boxShadow: '0 16px 32px rgba(0,0,0,0.5)' }} />
                     <Area type="monotone" dataKey="balance" stroke="var(--pink)" strokeWidth={4} fillOpacity={1} fill="url(#colorBalance)" activeDot={<CustomActiveDot />} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted)', fontWeight: 700, fontSize: 12 }} dy={-10} padding={{ left: 20, right: 20 }} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted)', fontWeight: 700, fontSize: 12 }} dy={10} padding={{ left: 20, right: 20 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Upcoming Bills Card */}
+            {/* Smart Insights Card */}
             <div className="dash-card anim-slide-up delay-1">
               <DecorativeBlob color="var(--orange)" top="-20px" right="-20px" />
-              <h3 className="dash-card-title" style={{ color: 'var(--cream)', position: 'relative', zIndex: 1 }}>Upcoming Bills</h3>
+              <h3 className="dash-card-title" style={{ color: 'var(--cream)', position: 'relative', zIndex: 1 }}>Smart Insights</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', zIndex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--cream)' }}>Electricity</p>
-                    <p style={{ fontSize: '13px', color: 'var(--red)', fontWeight: '800' }}>Due: 3 days</p>
+                
+                {/* Insight 1 */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ 
+                    background: 'rgba(234, 175, 54, 0.1)', 
+                    color: 'var(--mustard)',
+                    width: '36px', height: '36px', borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '18px', flexShrink: 0
+                  }}>
+                    💡
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '15px', fontWeight: '800', color: 'var(--cream)' }}>₹1,200.00</p>
-                    <button style={{ background: 'var(--orange)', border: 'none', borderRadius: 'var(--r-pill)', padding: '6px 16px', fontSize: '11px', fontWeight: '800', color: 'var(--bg)', marginTop: '4px', cursor: 'pointer', transition: 'transform 0.2s' }}>Pay Now</button>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--cream)', margin: '0 0 4px 0' }}>Track Category Limits</h4>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>
+                      Setting up active limits in budgets helps you curb impulse spending by up to 25%.
+                    </p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--cream)' }}>Internet</p>
-                    <p style={{ fontSize: '13px', color: 'var(--mustard)', fontWeight: '800' }}>Due: 12 days</p>
+
+                {/* Insight 2 */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ 
+                    background: 'rgba(73, 139, 129, 0.1)', 
+                    color: 'var(--teal)',
+                    width: '36px', height: '36px', borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '18px', flexShrink: 0
+                  }}>
+                    📊
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '15px', fontWeight: '800', color: 'var(--cream)' }}>₹999.00</p>
-                    <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.1)', color: 'var(--muted)', fontWeight: '800', padding: '6px 12px', borderRadius: 'var(--r-pill)', display: 'inline-block', marginTop: '4px' }}>Scheduled</span>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--cream)', margin: '0 0 4px 0' }}>Monthly Savings Target</h4>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>
+                      Your current savings rate is healthy. Try putting 10% more into savings this week.
+                    </p>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

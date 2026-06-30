@@ -11,6 +11,13 @@ const createBudget = async (req, res, next) => {
 
     const { category, limit } = req.body;
 
+    const INCOME_CATEGORIES = ['salary', 'freelance', 'investments', 'rental', 'bonus', 'gifts'];
+    if (INCOME_CATEGORIES.includes(category.toLowerCase())) {
+      const err = new Error('Budgets cannot be set for income categories');
+      err.statusCode = 400;
+      return next(err);
+    }
+
     const existingBudget = await Budget.findOne({ userId: req.user._id, category });
     if (existingBudget) {
       const err = new Error('Budget for this category already exists');
@@ -87,6 +94,14 @@ const updateBudget = async (req, res, next) => {
     if (budget.userId.toString() !== req.user._id.toString()) {
       const err = new Error('Not authorized to update this budget');
       err.statusCode = 403;
+      return next(err);
+    }
+
+    const targetCategory = req.body.category || budget.category;
+    const INCOME_CATEGORIES = ['salary', 'freelance', 'investments', 'rental', 'bonus', 'gifts'];
+    if (INCOME_CATEGORIES.includes(targetCategory.toLowerCase())) {
+      const err = new Error('Budgets cannot be set for income categories');
+      err.statusCode = 400;
       return next(err);
     }
 

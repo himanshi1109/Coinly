@@ -1,5 +1,5 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ReceiptText, Plus, PieChart, Wallet, Shield, LogOut, Users } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
+import { LayoutDashboard, ReceiptText, Plus, PieChart, Wallet, Shield, LogOut, Users, Grid } from 'lucide-react';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
@@ -8,17 +8,19 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
-      <div className="sidebar-logo">
+      <Link to="/" className="sidebar-logo" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <span style={{ fontSize: '24px' }}>💰</span>
         <div>Coinly</div>
-      </div>
+      </Link>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {isAdmin ? (
           <>
-            <NavItem to="/admin" icon={Shield} label="Admin Dashboard" />
-            <NavItem to="/admin/users" icon={Users} label="Manage Users" />
-            <NavItem to="/admin/transactions" icon={ReceiptText} label="All Transactions" />
+            <NavItem to="/admin" icon={Shield} label="Dashboard" />
+            <NavItem to="/admin/users" icon={Users} label="Users" />
+            <NavItem to="/admin/transactions" icon={ReceiptText} label="Transactions" />
+            <NavItem to="/admin/categories" icon={Grid} label="Categories" />
+            <NavItem to="/admin/reports" icon={PieChart} label="Reports" />
           </>
         ) : (
           <>
@@ -51,7 +53,7 @@ const Sidebar = () => {
 };
 
 const NavItem = ({ to, icon: Icon, label }) => (
-  <NavLink to={to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end={to === '/'}>
+  <NavLink to={to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end={to === '/' || to === '/admin'}>
     {({ isActive }) => (
       <>
         <Icon className="nav-icon" color={isActive ? '#111111' : 'white'} />

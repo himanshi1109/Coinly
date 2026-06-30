@@ -1,7 +1,7 @@
 import { formatCurrency } from '../utils/formatCurrency';
 import { CATEGORY_COLORS } from '../utils/categoryConfig';
 
-const TransactionItem = ({ transaction }) => {
+const TransactionItem = ({ transaction, userName }) => {
   const isIncome = transaction.type === 'income';
   const config = CATEGORY_COLORS[transaction.category] || CATEGORY_COLORS.Other;
 
@@ -12,12 +12,35 @@ const TransactionItem = ({ transaction }) => {
       alignItems: 'center', 
       gap: '16px', 
       marginBottom: '12px',
-      transition: 'background 0.2s'
+      transition: 'all 0.2s ease-in-out'
     }}
-    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-    onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.background = '#32363d';
+      e.currentTarget.style.transform = 'translateY(-2px)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.background = 'var(--surface)';
+      e.currentTarget.style.transform = 'translateY(0)';
+    }}
     >
       
+      {/* User Name (if provided) */}
+      {userName && (
+        <div style={{ 
+          width: '120px', 
+          fontWeight: '800', 
+          color: 'var(--cream)', 
+          fontSize: 'var(--fs-sm)', 
+          borderRight: '1px solid rgba(255,255,255,0.1)', 
+          paddingRight: '16px',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        }}>
+          {userName}
+        </div>
+      )}
+
       {/* Icon Circle */}
       <div style={{
         width: '48px', height: '48px', borderRadius: 'var(--r-md)',
@@ -54,7 +77,7 @@ const TransactionItem = ({ transaction }) => {
               {transaction.type}
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
-              {new Date(transaction.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              {new Date(transaction.createdAt || transaction.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
         </div>
